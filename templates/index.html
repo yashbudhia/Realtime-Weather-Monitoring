@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Weather Monitoring Dashboard</title>
+</head>
+<body>
+    <h1>Real-Time Weather Monitoring</h1>
+    <div id="weather-summary">
+        <!-- JavaScript will load weather summaries dynamically -->
+    </div>
+
+    <script>
+        // Fetch and display weather summaries via AJAX
+        async function loadWeatherData() {
+            const response = await fetch('/api/summaries');
+            const data = await response.json();
+            document.getElementById('weather-summary').innerHTML = JSON.stringify(data, null, 2);
+        }
+
+        loadWeatherData();
+    </script>
+</body>
+</html>
