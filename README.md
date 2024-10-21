@@ -3,6 +3,7 @@
 
 # File Structure
 
+```
 weather-monitoring-app/
 │
 ├── app.py                # Main entry point for the Flask application
@@ -24,3 +25,4 @@ weather-monitoring-app/
 │   └── style.css         # Styles for the frontend
 ├── requirements.txt      # Python dependencies
 └── README.md             # Documentation
+```
