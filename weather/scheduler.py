@@ -1,4 +1,5 @@
 from apscheduler.schedulers.background import BackgroundScheduler
+from pytz import timezone
 from weather.api import fetch_weather_data
 from weather.processor import process_weather_data
 from config import Config
@@ -13,5 +14,10 @@ def fetch_and_process():
 
 def start_scheduler():
     scheduler = BackgroundScheduler()
-    scheduler.add_job(fetch_and_process, 'interval', minutes=Config.FETCH_INTERVAL)
+    
+    # Set your desired timezone
+    my_timezone = timezone('Asia/Kolkata')  # Change this to your desired timezone
+    
+    # Schedule the fetch_and_process function with the timezone
+    scheduler.add_job(fetch_and_process, 'interval', minutes=Config.FETCH_INTERVAL, timezone=my_timezone)
     scheduler.start()
