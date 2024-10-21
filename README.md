@@ -21,8 +21,7 @@ weather-monitoring-app/
 │
 ├── templates/            # HTML files for the frontend
 │   └── index.html        # Main frontend UI
-├── static/               # Static files like CSS, JS for the frontend
-│   └── style.css         # Styles for the frontend
+|   └── style.css         # Styles for the frontend   
 ├── requirements.txt      # Python dependencies
 └── README.md             # Documentation
 ```
