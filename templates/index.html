@@ -14,9 +14,8 @@
                 {% for summary in weather_summaries %}
                     <li>
                         <h2>{{ summary.city }}</h2>
-                        <p>Average Temp: {{ summary.avg_temp }} °C</p>
-                        <p>Max Temp: {{ summary.max_temp }} °C</p>
-                        <p>Min Temp: {{ summary.min_temp }} °C</p>
+                        <p>Temperature: {{ summary.temp }} °C</p>
+                        <p>Feels Like: {{ summary.feels_like }} °C</p>
                         <p>Condition: {{ summary.condition }}</p>
                     </li>
                 {% endfor %}

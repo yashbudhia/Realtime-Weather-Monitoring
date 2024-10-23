@@ -1,24 +1,42 @@
 from flask import Flask, render_template
-from weather.scheduler import start_weather_scheduler
-from database import init_db
-import random  # Simulating weather data for now
+import requests
+import os
 
 app = Flask(__name__)
 
-# Initialize database
-init_db()
+# Load configuration from environment or use defaults
+OPENWEATHER_API_KEY = os.getenv('WEATHER_API_KEY', 'bd5e378503939ddaee76f12ad7a97608')
+CITIES = ['Delhi', 'Mumbai', 'Chennai', 'Bangalore', 'Kolkata', 'Hyderabad']
 
-# Start weather data scheduler
-start_weather_scheduler()
+def get_weather_data(city):
+    """
+    Fetch weather data for a city using the OpenWeatherMap API.
+    Returns weather details as a dictionary.
+    """
+    url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={OPENWEATHER_API_KEY}"
+    response = requests.get(url)
+    if response.status_code == 200:
+        data = response.json()
+        # Convert temperature from Kelvin to Celsius
+        temp_celsius = data['main']['temp'] - 273.15
+        feels_like_celsius = data['main']['feels_like'] - 273.15
+        weather_condition = data['weather'][0]['main']
+        
+        return {
+            "city": city,
+            "temp": round(temp_celsius, 2),
+            "feels_like": round(feels_like_celsius, 2),
+            "condition": weather_condition,
+            "dt": data['dt']  # Unix timestamp of the data update
+        }
+    else:
+        print(f"Failed to fetch weather data for {city}")
+        return None
 
 @app.route('/')
 def index():
-    # Simulating weather summaries
-    weather_summaries = [
-        {"city": "Delhi", "avg_temp": random.uniform(20, 30), "max_temp": random.uniform(30, 40), "min_temp": random.uniform(15, 20), "condition": "Clear"},
-        {"city": "Mumbai", "avg_temp": random.uniform(25, 35), "max_temp": random.uniform(35, 40), "min_temp": random.uniform(20, 25), "condition": "Rain"},
-        {"city": "Bangalore", "avg_temp": random.uniform(18, 28), "max_temp": random.uniform(28, 33), "min_temp": random.uniform(15, 20), "condition": "Cloudy"}
-    ]
+    # Get weather data for all cities
+    weather_summaries = [get_weather_data(city) for city in CITIES if get_weather_data(city) is not None]
     
     return render_template('index.html', weather_summaries=weather_summaries)
 
