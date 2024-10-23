@@ -1,23 +1,23 @@
-from apscheduler.schedulers.background import BackgroundScheduler
-from pytz import timezone
-from weather.api import fetch_weather_data
+import time
+import threading
+from weather.api import get_weather_data
 from weather.processor import process_weather_data
 from config import Config
 
-CITIES = ["Delhi", "Mumbai", "Chennai", "Bangalore", "Kolkata", "Hyderabad"]
+CITIES = ['Delhi', 'Mumbai', 'Chennai', 'Bangalore', 'Kolkata', 'Hyderabad']
 
-def fetch_and_process():
+def fetch_and_process_weather():
     for city in CITIES:
-        data = fetch_weather_data(city)
-        if data:
-            process_weather_data(data, city)
+        weather_data = get_weather_data(city)
+        if weather_data:
+            process_weather_data(weather_data)
 
-def start_scheduler():
-    scheduler = BackgroundScheduler()
+def start_weather_scheduler():
+    def run_scheduler():
+        while True:
+            fetch_and_process_weather()
+            time.sleep(Config.WEATHER_INTERVAL)
     
-    # Set your desired timezone
-    my_timezone = timezone('Asia/Kolkata')  # Change this to your desired timezone
-    
-    # Schedule the fetch_and_process function with the timezone
-    scheduler.add_job(fetch_and_process, 'interval', minutes=Config.FETCH_INTERVAL, timezone=my_timezone)
-    scheduler.start()
+    weather_thread = threading.Thread(target=run_scheduler)
+    weather_thread.daemon = True
+    weather_thread.start()

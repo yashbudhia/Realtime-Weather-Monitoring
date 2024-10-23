@@ -1,9 +1,7 @@
-from flask_pymongo import PyMongo
-from config import Config
+from pymongo import MongoClient
 
-mongo = None
+client = MongoClient('mongodb://localhost:27017/')
+db = client.weather_db
 
-def mongo_init(app):
-    global mongo
-    app.config["MONGO_URI"] = Config.MONGO_URI
-    mongo = PyMongo(app)
+def init_db():
+    print("Database initialized.")

@@ -1,6 +1,10 @@
-def check_alerts(city, current_temp):
-    # Example threshold: alert if temperature exceeds 35°C for 2 consecutive updates
-    threshold = 35
-    if current_temp > threshold:
-        print(f"ALERT: {city} temperature exceeds {threshold}°C!")
-        # Implement logic to send email or trigger another alert system
+from config import Config
+
+def check_thresholds(weather_data):
+    temp = weather_data['temperature']
+    if temp > Config.ALERT_THRESHOLD:
+        trigger_alert(weather_data)
+
+def trigger_alert(weather_data):
+    print(f"ALERT: Temperature in {weather_data['city']} exceeded {Config.ALERT_THRESHOLD}°C!")
+    # Optional: Implement email notifications or other alerting systems

@@ -3,24 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css">
-    <title>Weather Monitoring Dashboard</title>
+    <title>Weather Monitoring</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h1>Real-Time Weather Monitoring</h1>
-    <div id="weather-summary">
-        <!-- JavaScript will load weather summaries dynamically -->
+    <h1>Daily Weather Summaries</h1>
+    <div id="weather-summaries">
+        {% if weather_summaries %}
+            <ul>
+                {% for summary in weather_summaries %}
+                    <li>
+                        <h2>{{ summary.city }}</h2>
+                        <p>Average Temp: {{ summary.avg_temp }} °C</p>
+                        <p>Max Temp: {{ summary.max_temp }} °C</p>
+                        <p>Min Temp: {{ summary.min_temp }} °C</p>
+                        <p>Condition: {{ summary.condition }}</p>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No weather data available</p>
+        {% endif %}
     </div>
-
-    <script>
-        // Fetch and display weather summaries via AJAX
-        async function loadWeatherData() {
-            const response = await fetch('/api/summaries');
-            const data = await response.json();
-            document.getElementById('weather-summary').innerHTML = JSON.stringify(data, null, 2);
-        }
-
-        loadWeatherData();
-    </script>
 </body>
 </html>
