@@ -8,21 +8,31 @@
 </head>
 <body>
     <h1>Daily Weather Summaries</h1>
+    
     <div id="weather-summaries">
-        {% if weather_summaries %}
-            <ul>
-                {% for summary in weather_summaries %}
-                    <li>
-                        <h2>{{ summary.city }}</h2>
-                        <p>Temperature: {{ summary.temp }} °C</p>
-                        <p>Feels Like: {{ summary.feels_like }} °C</p>
-                        <p>Condition: {{ summary.condition }}</p>
-                    </li>
-                {% endfor %}
-            </ul>
-        {% else %}
-            <p>No weather data available</p>
-        {% endif %}
+        {% for weather in weather_data %}
+        <div class="city-weather">
+            <h2>{{ weather.city }}</h2>
+            <p>Temperature: {{ weather.temp }}°C</p>
+            <p>Feels Like: {{ weather.feels_like }}°C</p>
+            <p>Condition: {{ weather.condition }}</p>
+        </div>
+        {% endfor %}
     </div>
+
+    <h2>Daily Aggregates:</h2>
+    <p>Average Temperature: {{ daily_summary.average_temp }}°C</p>
+    <p>Maximum Temperature: {{ daily_summary.max_temp }}°C</p>
+    <p>Minimum Temperature: {{ daily_summary.min_temp }}°C</p>
+    <p>Dominant Condition: {{ daily_summary.dominant_condition }}</p>
+
+    <h2>Alerts:</h2>
+    <ul>
+        {% for alert in alerts %}
+        <li>{{ alert }}</li>
+        {% else %}
+        <li>No alerts</li>
+        {% endfor %}
+    </ul>
 </body>
 </html>

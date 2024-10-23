@@ -1,7 +1,12 @@
-from database import db
+from pymongo import MongoClient
+from config import Config
 
-def store_daily_summary(summary):
-    db.daily_summaries.insert_one(summary)
+client = MongoClient(Config.MONGO_URI)
+db = client.weather_db
+summaries = db.daily_summaries
 
-def get_daily_summaries():
-    return list(db.daily_summaries.find())
+def save_daily_summary(summary):
+    """
+    Save the daily weather summary to MongoDB.
+    """
+    summaries.insert_one(summary)

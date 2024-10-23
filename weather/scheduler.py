@@ -1,23 +1,28 @@
 import time
-import threading
-from weather.api import get_weather_data
+from threading import Timer
+from weather.api import get_weather_updates
 from weather.processor import process_weather_data
-from config import Config
 
-CITIES = ['Delhi', 'Mumbai', 'Chennai', 'Bangalore', 'Kolkata', 'Hyderabad']
+class WeatherScheduler:
+    def __init__(self, interval):
+        self.interval = interval
 
-def fetch_and_process_weather():
-    for city in CITIES:
-        weather_data = get_weather_data(city)
+    def start(self):
+        """
+        Start the weather data retrieval and processing at regular intervals.
+        """
+        self.fetch_and_process()
+        Timer(self.interval, self.start).start()
+
+    def fetch_and_process(self):
+        """
+        Fetch the weather data and process it for rollups/aggregates.
+        """
+        weather_data = get_weather_updates()
         if weather_data:
             process_weather_data(weather_data)
 
-def start_weather_scheduler():
-    def run_scheduler():
-        while True:
-            fetch_and_process_weather()
-            time.sleep(Config.WEATHER_INTERVAL)
-    
-    weather_thread = threading.Thread(target=run_scheduler)
-    weather_thread.daemon = True
-    weather_thread.start()
+# In app.py or main script
+if __name__ == '__main__':
+    scheduler = WeatherScheduler(Config.WEATHER_INTERVAL)
+    scheduler.start()
