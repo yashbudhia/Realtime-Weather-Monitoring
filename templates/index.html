@@ -5,34 +5,85 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weather Monitoring</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='js/chart.umd.js') }}"></script> <!-- Load Chart.js from local file -->
 </head>
 <body>
     <h1>Daily Weather Summaries</h1>
     
-    <div id="weather-summaries">
+    <div id="weather-summaries" class="city-summary-container">
         {% for weather in weather_data %}
-        <div class="city-weather">
-            <h2>{{ weather.city }}</h2>
-            <p>Temperature: {{ weather.temp }}°C</p>
-            <p>Feels Like: {{ weather.feels_like }}°C</p>
-            <p>Condition: {{ weather.condition }}</p>
+        <div class="city-summary">
+            <div class="city-card">
+                <div class="city-details">
+                    <h2>{{ weather.city }}</h2>
+                    <p>Temperature: {{ weather.temp }}°C</p>
+                    <p>Feels Like: {{ weather.feels_like }}°C</p>
+                    <p>Condition: {{ weather.condition }}</p>
+                </div>
+                <canvas id="chart-{{ loop.index }}"></canvas> <!-- Placeholder for the chart -->
+            </div>
         </div>
         {% endfor %}
     </div>
 
     <h2>Daily Aggregates:</h2>
-    <p>Average Temperature: {{ daily_summary.average_temp }}°C</p>
-    <p>Maximum Temperature: {{ daily_summary.max_temp }}°C</p>
-    <p>Minimum Temperature: {{ daily_summary.min_temp }}°C</p>
-    <p>Dominant Condition: {{ daily_summary.dominant_condition }}</p>
+    <div class="card">
+        <p>Average Temperature: {{ daily_summary.average_temp }}°C</p>
+        <p>Maximum Temperature: {{ daily_summary.max_temp }}°C</p>
+        <p>Minimum Temperature: {{ daily_summary.min_temp }}°C</p>
+        <p>Dominant Condition: {{ daily_summary.dominant_condition }}</p>
+    </div>
 
     <h2>Alerts:</h2>
-    <ul>
-        {% for alert in alerts %}
-        <li>{{ alert }}</li>
-        {% else %}
-        <li>No alerts</li>
-        {% endfor %}
-    </ul>
+    <div id="alert-logs">
+        <ul>
+            {% for alert in alerts %}
+            <li class="alert-warning">{{ alert }}</li>
+            {% else %}
+            <li>No alerts</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <script>
+        // Create an array for the weather data from the template
+        const weatherData = [
+            {% for weather in weather_data %}
+            {
+                city: "{{ weather.city }}",
+                temp: {{ weather.temp }},
+                feels_like: {{ weather.feels_like }},
+                condition: "{{ weather.condition }}"
+            }{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ].filter(Boolean); // Filter out any undefined entries if weather_data is empty
+    
+        // Create a chart for each city
+        weatherData.forEach((data, index) => {
+            const ctx = document.getElementById('chart-' + (index + 1)).getContext('2d');
+            new Chart(ctx, {
+                type: 'line', // or 'bar', 'radar', etc.
+                data: {
+                    labels: ['Morning', 'Afternoon', 'Evening', 'Night'], // Example labels
+                    datasets: [{
+                        label: `Temperature in ${data.city}`,
+                        data: [data.temp, data.feels_like, 20, 15], // Example data points
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+    
 </body>
 </html>
