@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect, url_for
 import os
 from weather.api import fetch_weather_data, calculate_daily_aggregates
 from weather.alert import check_alert_condition
@@ -22,6 +22,13 @@ def index():
     alerts = check_alert_condition(weather_data, ALERT_THRESHOLD)
 
     return render_template('index.html', weather_data=weather_data, daily_summary=daily_summary, alerts=alerts)
+
+@app.route('/set_threshold', methods=['POST'])
+def set_threshold():
+    global ALERT_THRESHOLD  # Declare to modify the global variable
+    new_threshold = request.form.get('threshold', type=int)
+    ALERT_THRESHOLD = new_threshold  # Update the threshold
+    return redirect(url_for('index'))  # Redirect back to the index
 
 if __name__ == '__main__':
     app.run(debug=True)

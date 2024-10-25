@@ -9,6 +9,22 @@ h1 {
     color: #333;
 }
 
+.threshold-form {
+    text-align: center;
+    margin-bottom: 20px;
+    padding: 10px;
+    background-color: #e7f3fe; /* Light blue background for form */
+    border-radius: 5px;
+}
+
+.threshold-form h2 {
+    margin-bottom: 10px;
+}
+
+.city-data-section {
+    margin-top: 20px;
+}
+
 .city-summary-container {
     display: flex;
     flex-wrap: wrap;
@@ -19,7 +35,6 @@ h1 {
     margin: 10px;
     flex: 1 1 300px;           /* Allow flexible card size */
     max-width: 400px;          /* Set a maximum width for uniformity */
-    display: flex;             /* Flexbox for inner content */
 }
 
 .city-card {
@@ -31,6 +46,11 @@ h1 {
     border-radius: 8px;       /* Rounded corners */
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Shadow for depth */
     background-color: #fff;    /* White background */
+    transition: transform 0.3s; /* Smooth hover effect */
+}
+
+.city-card:hover {
+    transform: scale(1.05); /* Scale up on hover */
 }
 
 .city-details {
@@ -65,11 +85,4 @@ canvas {
     padding: 10px;            /* Inner padding */
     border-radius: 4px;       /* Rounded corners */
     margin-bottom: 10px;      /* Space below alert */
-}
-
-.alert {
-    color: red;               /* Red text for alerts */
-    font-weight: bold;        /* Bold font */
-    text-align: center;       /* Center text */
-    margin-top: 10px;        /* Margin above alert */
 }

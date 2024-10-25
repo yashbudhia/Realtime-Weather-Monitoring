@@ -5,26 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weather Monitoring</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <script src="{{ url_for('static', filename='js/chart.umd.js') }}"></script> <!-- Load Chart.js from local file -->
+    <script src="{{ url_for('static', filename='js/chart.umd.js') }}"></script>
 </head>
 <body>
     <h1>Daily Weather Summaries</h1>
-    
-    <div id="weather-summaries" class="city-summary-container">
-        {% for weather in weather_data %}
-        <div class="city-summary">
-            <div class="city-card">
-                <div class="city-details">
-                    <h2>{{ weather.city }}</h2>
-                    <p>Temperature: {{ weather.temp }}°C</p>
-                    <p>Feels Like: {{ weather.feels_like }}°C</p>
-                    <p>Condition: {{ weather.condition }}</p>
-                </div>
-                <canvas id="chart-{{ loop.index }}"></canvas> <!-- Placeholder for the chart -->
-            </div>
-        </div>
-        {% endfor %}
+
+    <!-- Threshold Configuration Form -->
+    <div class="threshold-form">
+        <h2>Set Temperature Alert Threshold</h2>
+        <form action="/set_threshold" method="post">
+            <label for="threshold">Temperature Alert Threshold (°C):</label>
+            <input type="number" id="threshold" name="threshold" min="0" required>
+            <button type="submit">Update Threshold</button>
+        </form>
     </div>
+
+    <!-- City Data Section -->
+    <section class="city-data-section">
+        <h2>City Weather Data</h2>
+        <div id="weather-summaries" class="city-summary-container">
+            {% for weather in weather_data %}
+            <div class="city-summary">
+                <div class="city-card">
+                    <div class="city-details">
+                        <h2>{{ weather.city }}</h2>
+                        <p>Temperature: {{ weather.temp }}°C</p>
+                        <p>Feels Like: {{ weather.feels_like }}°C</p>
+                        <p>Condition: {{ weather.condition }}</p>
+                    </div>
+                    <canvas id="chart-{{ loop.index }}"></canvas>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
 
     <h2>Daily Aggregates:</h2>
     <div class="card">
@@ -57,12 +71,12 @@
             }{% if not loop.last %},{% endif %}
             {% endfor %}
         ].filter(Boolean); // Filter out any undefined entries if weather_data is empty
-    
+
         // Create a chart for each city
         weatherData.forEach((data, index) => {
             const ctx = document.getElementById('chart-' + (index + 1)).getContext('2d');
             new Chart(ctx, {
-                type: 'line', // or 'bar', 'radar', etc.
+                type: 'line',
                 data: {
                     labels: ['Morning', 'Afternoon', 'Evening', 'Night'], // Example labels
                     datasets: [{
@@ -84,6 +98,5 @@
             });
         });
     </script>
-    
 </body>
 </html>
