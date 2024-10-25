@@ -1,6 +1,7 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 import os
-from weather.api import fetch_weather_data, calculate_daily_aggregates
+from datetime import datetime
+from weather.api import fetch_weather_data, fetch_forecast_data, calculate_daily_aggregates
 from weather.alert import check_alert_condition
 
 app = Flask(__name__)
@@ -29,6 +30,24 @@ def set_threshold():
     new_threshold = request.form.get('threshold', type=int)
     ALERT_THRESHOLD = new_threshold  # Update the threshold
     return redirect(url_for('index'))  # Redirect back to the index
+
+@app.route('/weather/forecast', methods=['GET'])
+def forecast():
+    city = request.args.get('city')
+    forecast_data = fetch_forecast_data(city, OPENWEATHER_API_KEY)
+    
+    # Format forecast data
+    formatted_forecast = [
+        {
+            "date": datetime.strptime(f["dt"], "%Y-%m-%d %H:%M:%S").strftime("%d %b %Y"),
+            "time": datetime.strptime(f["dt"], "%Y-%m-%d %H:%M:%S").strftime("%H:%M"),
+            "temp": f["temp"],
+            "condition": f["condition"]
+        }
+        for f in forecast_data
+    ]
+    
+    return jsonify(formatted_forecast)  # Return the forecast data as JSON
 
 if __name__ == '__main__':
     app.run(debug=True)

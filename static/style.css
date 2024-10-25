@@ -1,59 +1,69 @@
+/* General styles for the body */
 body {
     font-family: Arial, sans-serif;
     margin: 20px;
     background-color: #f4f4f4;
 }
 
+/* Main heading styles */
 h1 {
     text-align: center;
     color: #333;
 }
 
+/* Unit toggle button styles */
 .unit-toggle {
     text-align: center;
     margin-bottom: 20px;
 }
 
+/* Container for city summaries */
 .city-summary-container {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
 }
 
+/* Individual city summary card styles */
 .city-summary {
     margin: 10px;
-    flex: 1 1 300px;           /* Allow flexible card size */
-    max-width: 400px;          /* Set a maximum width for uniformity */
+    flex: 1 1 400px;           /* Increase the base size for cards */
+    max-width: 500px;          /* Increase maximum width for uniformity */
 }
 
+/* Styles for each city card */
 .city-card {
     padding: 20px;             /* Inner padding */
     display: flex;             /* Flexbox for content layout */
     flex-direction: column;    /* Stack content vertically */
     justify-content: space-between; /* Distribute space between elements */
-    height: 350px;             /* Fixed height for uniform cards */
+    height: 400px;             /* Increased height for larger cards */
     border-radius: 8px;       /* Rounded corners */
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Shadow for depth */
     background-color: #fff;    /* White background */
     transition: transform 0.3s; /* Smooth hover effect */
 }
 
+/* Hover effect for city cards */
 .city-card:hover {
     transform: scale(1.05); /* Scale up on hover */
 }
 
+/* City details styling */
 .city-details {
     margin-bottom: 20px;       /* Space between details and chart */
     text-align: center;        /* Center text */
     flex-grow: 1;              /* Allow this section to grow and fill space */
 }
 
+/* Chart canvas styling */
 canvas {
     margin: 20px 0;           /* Margin around the chart */
     max-width: 100%;          /* Ensure the chart fits within the card */
     height: 150px;            /* Set a fixed height for the chart */
 }
 
+/* Alert logs styling */
 #alert-logs {
     margin-top: 20px;
     background-color: #fce4e4; /* Light red background for alerts */
@@ -62,6 +72,7 @@ canvas {
     border-radius: 8px;       /* Rounded corners */
 }
 
+/* General card styles */
 .card {
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     border-radius: 8px;       /* Rounded corners */
@@ -69,6 +80,7 @@ canvas {
     padding: 20px;            /* Inner padding */
 }
 
+/* Warning alert styles */
 .alert-warning {
     background-color: #ffeb3b; /* Yellow background for warnings */
     color: #333;               /* Text color */
@@ -76,6 +88,8 @@ canvas {
     border-radius: 4px;       /* Rounded corners */
     margin-bottom: 10px;      /* Space below alert */
 }
+
+/* Conversion form styles */
 .conversion-form {
     margin-top: 20px;
     padding: 15px;
@@ -84,6 +98,7 @@ canvas {
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
+/* Input and button styles in the conversion form */
 .conversion-form input,
 .conversion-form button {
     padding: 10px;
@@ -92,12 +107,14 @@ canvas {
     border: 1px solid #ccc;
 }
 
+/* Button styles in the conversion form */
 .conversion-form button {
     background-color: #007bff; /* Bootstrap primary color */
     color: white;
     cursor: pointer;
 }
 
+/* Button hover effect in the conversion form */
 .conversion-form button:hover {
     background-color: #0056b3; /* Darker shade on hover */
 }

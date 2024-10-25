@@ -6,6 +6,55 @@
     <title>Weather Monitoring</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <script src="{{ url_for('static', filename='js/chart.umd.js') }}"></script>
+    <style>
+        /* Add some custom styles for modal and forecast cards */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .forecast-card {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+
+        .forecast-chart {
+            width: 100%;
+            height: 300px; /* Adjust height as needed */
+        }
+    </style>
 </head>
 <body>
     <h1>Daily Weather Summaries</h1>
@@ -42,8 +91,9 @@
                         <p class="temperature">Temperature: {{ weather.temp }}°C</p>
                         <p class="feels-like">Feels Like: {{ weather.feels_like }}°C</p>
                         <p>Condition: {{ weather.condition }}</p>
+                        <button class="forecast-button" data-city="{{ weather.city }}">Get Forecast</button>
+                        <canvas id="chart-{{ loop.index }}" style="display: block;"></canvas>
                     </div>
-                    <canvas id="chart-{{ loop.index }}"></canvas>
                 </div>
             </div>
             {% endfor %}
@@ -67,6 +117,15 @@
             <li>No alerts</li>
             {% endfor %}
         </ul>
+    </div>
+
+    <!-- Modal for Forecast Display -->
+    <div id="forecastModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Forecast Details</h2>
+            <div id="forecastContainer"></div>
+        </div>
     </div>
 
     <script>
@@ -94,7 +153,8 @@
     
         // Create a chart for each city
         weatherData.forEach((data, index) => {
-            const ctx = document.getElementById('chart-' + (index + 1)).getContext('2d');
+            const chartElement = document.getElementById('chart-' + (index + 1));
+            const ctx = chartElement.getContext('2d');
             const tempData = [data.tempC, data.feels_likeC, 20, 15]; // Example data points for Celsius
             new Chart(ctx, {
                 type: 'line',
@@ -122,59 +182,85 @@
                 }
             });
         });
-    
-        // Initialize daily summary display
-        document.addEventListener("DOMContentLoaded", function() {
-            document.querySelector("#dailyAverage").innerText = `Average Temperature: ${dailySummary.averageTemp}°C`;
-            document.querySelector("#dailyMax").innerText = `Maximum Temperature: ${dailySummary.maxTemp}°C`;
-            document.querySelector("#dailyMin").innerText = `Minimum Temperature: ${dailySummary.minTemp}°C`;
-            document.querySelector("#dailyCondition").innerText = `Dominant Condition: ${dailySummary.dominantCondition}`;
+
+        // Event listener for temperature unit toggle
+        document.getElementById('celsiusButton').addEventListener('click', () => {
+            toggleTemperatureUnit('C');
         });
-    
-        // Temperature unit toggle logic
-        const celsiusButton = document.getElementById('celsiusButton');
-        const fahrenheitButton = document.getElementById('fahrenheitButton');
-        const citySummaries = document.querySelectorAll('.city-summary');
-    
-        function updateTemperatureDisplay(unit) {
-            citySummaries.forEach((summary, index) => {
-                const tempC = parseFloat(summary.getAttribute('data-temp-c'));
-                const feelsLikeC = parseFloat(summary.getAttribute('data-feels-like-c'));
-                const tempF = parseFloat(summary.getAttribute('data-temp-f'));
-                const feelsLikeF = parseFloat(summary.getAttribute('data-feels-like-f'));
-                const temperatureElement = summary.querySelector('.temperature');
-                const feelsLikeElement = summary.querySelector('.feels-like');
-                const ctx = document.getElementById('chart-' + (index + 1)).getContext('2d');
-                const chart = Chart.getChart(ctx); // Get the existing chart
-    
-                if (unit === 'C') {
-                    temperatureElement.innerText = `Temperature: ${tempC}°C`;
-                    feelsLikeElement.innerText = `Feels Like: ${feelsLikeC}°C`;
-                    if (chart) {
-                        chart.data.datasets[0].data = [tempC, feelsLikeC, 20, 15]; // Update data for Celsius
-                    }
-                } else {
-                    temperatureElement.innerText = `Temperature: ${tempF.toFixed(2)}°F`;
-                    feelsLikeElement.innerText = `Feels Like: ${feelsLikeF.toFixed(2)}°F`;
-                    if (chart) {
-                        chart.data.datasets[0].data = [tempF.toFixed(2), feelsLikeF.toFixed(2), 68, 59]; // Update data for Fahrenheit
-                    }
-                }
-                chart.update(); // Update the chart
+        document.getElementById('fahrenheitButton').addEventListener('click', () => {
+            toggleTemperatureUnit('F');
+        });
+
+        // Function to toggle temperature unit
+        function toggleTemperatureUnit(unit) {
+            const summaries = document.querySelectorAll('.city-summary');
+            summaries.forEach(summary => {
+                const tempC = summary.dataset.tempC;
+                const feelsLikeC = summary.dataset.feelsLikeC;
+                const tempF = summary.dataset.tempF;
+                const feelsLikeF = summary.dataset.feelsLikeF;
+
+                summary.querySelector('.temperature').textContent = `Temperature: ${unit === 'C' ? tempC : tempF}°${unit}`;
+                summary.querySelector('.feels-like').textContent = `Feels Like: ${unit === 'C' ? feelsLikeC : feelsLikeF}°${unit}`;
             });
         }
-    
-        celsiusButton.addEventListener('click', () => {
-            updateTemperatureDisplay('C');
+
+        // Event listener for each forecast button
+        document.querySelectorAll('.forecast-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const city = button.dataset.city;  // Get the city from the button's data attribute
+                fetchForecast(city);  // Call the function to fetch the forecast
+            });
         });
-    
-        fahrenheitButton.addEventListener('click', () => {
-            updateTemperatureDisplay('F');
-        });
-    
-        // Initialize the display to Celsius by default
-        updateTemperatureDisplay('C');
+
+        // Function to fetch the forecast for a specific city
+        function fetchForecast(city) {
+            fetch(`/weather/forecast?city=${city}`)  // Use GET request with query parameter
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();  // Parse the JSON response
+                })
+                .then(data => {
+                    // Display the forecast data in the modal
+                    displayForecast(city, data);  // Pass city name and data
+                })
+                .catch(error => {
+                    console.error('Error fetching forecast:', error);
+                });
+        }
+
+        // Function to display the forecast data
+        function displayForecast(city, forecastData) {
+            const forecastContainer = document.getElementById('forecastContainer');
+            forecastContainer.innerHTML = ''; // Clear previous data
+            forecastData.forEach(entry => {
+                const forecastCard = document.createElement('div');
+                forecastCard.className = 'forecast-card';
+                forecastCard.innerHTML = `
+                    <h3>${entry.date}</h3>
+                   <p>Time: ${entry.time}</p>
+                    <p>Temperature: ${entry.temp}°C</p>
+                    <p>Condition: ${entry.condition}</p>
+                `;
+                forecastContainer.appendChild(forecastCard);
+            });
+            document.getElementById('forecastModal').style.display = 'block'; // Show modal
+        }
+
+        // Event listener for modal close button
+        document.querySelector('.close').onclick = function() {
+            document.getElementById('forecastModal').style.display = 'none'; // Close modal
+        };
+
+        // Close the modal when clicking outside of it
+        window.onclick = function(event) {
+            const modal = document.getElementById('forecastModal');
+            if (event.target === modal) {
+                modal.style.display = 'none'; // Close modal if clicked outside
+            }
+        };
     </script>
-    
 </body>
 </html>
