@@ -10,6 +10,12 @@
 <body>
     <h1>Daily Weather Summaries</h1>
 
+    <!-- Temperature Unit Toggle -->
+    <div class="unit-toggle">
+        <button id="celsiusButton">Celsius</button>
+        <button id="fahrenheitButton">Fahrenheit</button>
+    </div>
+
     <!-- Threshold Configuration Form -->
     <div class="threshold-form">
         <h2>Set Temperature Alert Threshold</h2>
@@ -25,12 +31,16 @@
         <h2>City Weather Data</h2>
         <div id="weather-summaries" class="city-summary-container">
             {% for weather in weather_data %}
-            <div class="city-summary">
+            <div class="city-summary" 
+                 data-temp-c="{{ weather.temp }}" 
+                 data-feels-like-c="{{ weather.feels_like }}" 
+                 data-temp-f="{{ (weather.temp * 9/5) + 32 }}" 
+                 data-feels-like-f="{{ (weather.feels_like * 9/5) + 32 }}">
                 <div class="city-card">
                     <div class="city-details">
                         <h2>{{ weather.city }}</h2>
-                        <p>Temperature: {{ weather.temp }}°C</p>
-                        <p>Feels Like: {{ weather.feels_like }}°C</p>
+                        <p class="temperature">Temperature: {{ weather.temp }}°C</p>
+                        <p class="feels-like">Feels Like: {{ weather.feels_like }}°C</p>
                         <p>Condition: {{ weather.condition }}</p>
                     </div>
                     <canvas id="chart-{{ loop.index }}"></canvas>
@@ -65,23 +75,34 @@
             {% for weather in weather_data %}
             {
                 city: "{{ weather.city }}",
-                temp: {{ weather.temp }},
-                feels_like: {{ weather.feels_like }},
+                tempC: {{ weather.temp }},
+                feels_likeC: {{ weather.feels_like }},
+                tempF: {{ (weather.temp * 9/5) + 32 }},
+                feels_likeF: {{ (weather.feels_like * 9/5) + 32 }},
                 condition: "{{ weather.condition }}"
             }{% if not loop.last %},{% endif %}
             {% endfor %}
-        ].filter(Boolean); // Filter out any undefined entries if weather_data is empty
-
+        ].filter(Boolean);
+    
+        // Get daily summary values from the template
+        const dailySummary = {
+            averageTemp: {{ daily_summary.average_temp }},
+            maxTemp: {{ daily_summary.max_temp }},
+            minTemp: {{ daily_summary.min_temp }},
+            dominantCondition: "{{ daily_summary.dominant_condition }}"
+        };
+    
         // Create a chart for each city
         weatherData.forEach((data, index) => {
             const ctx = document.getElementById('chart-' + (index + 1)).getContext('2d');
+            const tempData = [data.tempC, data.feels_likeC, 20, 15]; // Example data points for Celsius
             new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: ['Morning', 'Afternoon', 'Evening', 'Night'], // Example labels
+                    labels: ['Morning', 'Afternoon', 'Evening', 'Night'],
                     datasets: [{
                         label: `Temperature in ${data.city}`,
-                        data: [data.temp, data.feels_like, 20, 15], // Example data points
+                        data: tempData,
                         backgroundColor: 'rgba(75, 192, 192, 0.2)',
                         borderColor: 'rgba(75, 192, 192, 1)',
                         borderWidth: 1
@@ -91,12 +112,69 @@
                     responsive: true,
                     scales: {
                         y: {
-                            beginAtZero: true
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Temperature (°C)'
+                            }
                         }
                     }
                 }
             });
         });
+    
+        // Initialize daily summary display
+        document.addEventListener("DOMContentLoaded", function() {
+            document.querySelector("#dailyAverage").innerText = `Average Temperature: ${dailySummary.averageTemp}°C`;
+            document.querySelector("#dailyMax").innerText = `Maximum Temperature: ${dailySummary.maxTemp}°C`;
+            document.querySelector("#dailyMin").innerText = `Minimum Temperature: ${dailySummary.minTemp}°C`;
+            document.querySelector("#dailyCondition").innerText = `Dominant Condition: ${dailySummary.dominantCondition}`;
+        });
+    
+        // Temperature unit toggle logic
+        const celsiusButton = document.getElementById('celsiusButton');
+        const fahrenheitButton = document.getElementById('fahrenheitButton');
+        const citySummaries = document.querySelectorAll('.city-summary');
+    
+        function updateTemperatureDisplay(unit) {
+            citySummaries.forEach((summary, index) => {
+                const tempC = parseFloat(summary.getAttribute('data-temp-c'));
+                const feelsLikeC = parseFloat(summary.getAttribute('data-feels-like-c'));
+                const tempF = parseFloat(summary.getAttribute('data-temp-f'));
+                const feelsLikeF = parseFloat(summary.getAttribute('data-feels-like-f'));
+                const temperatureElement = summary.querySelector('.temperature');
+                const feelsLikeElement = summary.querySelector('.feels-like');
+                const ctx = document.getElementById('chart-' + (index + 1)).getContext('2d');
+                const chart = Chart.getChart(ctx); // Get the existing chart
+    
+                if (unit === 'C') {
+                    temperatureElement.innerText = `Temperature: ${tempC}°C`;
+                    feelsLikeElement.innerText = `Feels Like: ${feelsLikeC}°C`;
+                    if (chart) {
+                        chart.data.datasets[0].data = [tempC, feelsLikeC, 20, 15]; // Update data for Celsius
+                    }
+                } else {
+                    temperatureElement.innerText = `Temperature: ${tempF.toFixed(2)}°F`;
+                    feelsLikeElement.innerText = `Feels Like: ${feelsLikeF.toFixed(2)}°F`;
+                    if (chart) {
+                        chart.data.datasets[0].data = [tempF.toFixed(2), feelsLikeF.toFixed(2), 68, 59]; // Update data for Fahrenheit
+                    }
+                }
+                chart.update(); // Update the chart
+            });
+        }
+    
+        celsiusButton.addEventListener('click', () => {
+            updateTemperatureDisplay('C');
+        });
+    
+        fahrenheitButton.addEventListener('click', () => {
+            updateTemperatureDisplay('F');
+        });
+    
+        // Initialize the display to Celsius by default
+        updateTemperatureDisplay('C');
     </script>
+    
 </body>
 </html>
